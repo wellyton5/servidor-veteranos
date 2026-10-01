@@ -72,6 +72,10 @@
   .fase p { margin: 6px 0 0; color: var(--texto2); font-size: 13px; }
   .fase.agora { border-color: var(--marca); box-shadow: 0 0 0 1px var(--marca) inset; }
   .fase.agora b::after { content: " · AGORA"; color: var(--marca); font-size: 11px; letter-spacing: .08em; }
+  .sites { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .sites a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: var(--sup2); border: 1px solid var(--linha);
+             color: var(--texto); text-decoration: none; font-weight: 600; font-size: 14px; }
+  .sites a:hover { border-color: var(--gelo); }
   footer { color: var(--texto3); font-size: 13px; border-top: 1px solid var(--linha); padding-top: 16px; }
   .neve { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
   .pagina > * { position: relative; z-index: 1; }
@@ -89,6 +93,11 @@
     <p class="lead destaque">O primeiro servidor de console com Chernarus de estações do ano: neve no chão, neve caindo e um clima que muda do inverno ao verão aos olhos do jogador.</p>
     <p class="lead">Neve, gelo sobre os lagos, nevascas no inverno, dezenas de eventos rodando ao mesmo tempo — e o servidor segue sereno. Aqui estão os números reais de como ele trabalha, medidos minuto a minuto.</p>
     <div class="vivo" id="vivo"><i></i> carregando…</div>
+    <nav class="sites" aria-label="Outros sites do servidor">
+      <a href="https://wellyton5.github.io/bases-veteranos/">🗺️ Bases no mapa</a>
+      <a href="https://wellyton5.github.io/arsenal-veteranos/">🔫 Arsenal</a>
+      <a href="https://wellyton5.github.io/regras-veteranos/">📜 Regras</a>
+    </nav>
   </header>
 
   <section class="painel">
