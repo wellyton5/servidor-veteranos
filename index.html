@@ -75,6 +75,7 @@
   footer { color: var(--texto3); font-size: 13px; border-top: 1px solid var(--linha); padding-top: 16px; }
   .neve { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
   .pagina > * { position: relative; z-index: 1; }
+  @media (max-width: 600px) { .ciclo-dias span:nth-child(3) { display: none; } }
   @media (max-width: 760px) { .sim { grid-template-columns: 1fr; } .grafico { height: 240px; } .pagina { padding: 28px 12px 48px; gap: 30px; } }
   @media (prefers-reduced-motion: reduce) { .neve { display: none; } .vivo i { animation: none; } }
 </style>
