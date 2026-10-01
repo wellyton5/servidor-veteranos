@@ -88,7 +88,7 @@
 
   <section class="painel">
     <h2>Simulador: e com o servidor cheio?</h2>
-    <p class="nota">Monte o cenário. A projeção usa o quanto a memória do servidor sobe a cada jogador a mais (medido nos dados reais) e o peso típico de cada atividade no DayZ. É uma <b>estimativa</b>, não um teste com jogadores de verdade.</p>
+    <p class="nota">Monte o cenário. Até o máximo de jogadores já medido, a conta usa os dados reais. Acima disso a memória cresce mais devagar — o loot já existe com o servidor vazio e zumbis e animais têm limite no servidor inteiro — então mostramos uma <b>faixa provável</b>. O esforço considera quantas das vagas estão ocupadas e quantos estão em atividade pesada (tiro e veículo). É uma <b>estimativa</b>, não um teste com jogadores de verdade.</p>
     <div class="sim">
       <div>
         <div class="controle"><label>🔨 Construindo base <span id="v-construindo">4</span></label><input type="range" min="0" max="25" value="4" id="construindo"><p>Paredes, portões, barris: cada peça vira um objeto salvo no mundo.</p></div>
@@ -179,33 +179,40 @@ function desenharGrafico() {
   });
 }
 
-// Peso de cada atividade (estimativa, MB extra por jogador e esforço relativo)
-const ATIV = {construindo: {mem: 15, cpu: 1.0}, explorando: {mem: 30, cpu: 1.4}, pvp: {mem: 10, cpu: 1.8}, dirigindo: {mem: 40, cpu: 2.2}};
+// MODELO (corrigido 30/09/2026): ate o pico medido (8 jogadores) usa a conta dos dados reais. Acima disso a memoria cresce
+// mais devagar (loot ja existe com o servidor vazio; zumbis e animais tem limite no servidor inteiro), entao mostramos uma FAIXA:
+// de 40 a 100 MB por jogador a mais. Esforco = ocupacao das 50 vagas + quanto da turma esta em atividade pesada (tiro, veiculo).
+const ATIV = {construindo: 0.2, explorando: 0.4, pvp: 0.8, dirigindo: 1.0};   // peso relativo de cada atividade (0 a 1)
 function simular() {
-  const n = {}; let total = 0, extraMem = 0, esforco = 0;
-  for (const k in ATIV) { n[k] = +$(k).value; $('v-' + k).textContent = n[k]; total += n[k]; extraMem += n[k] * ATIV[k].mem; esforco += n[k] * ATIV[k].cpu; }
-  const m = D ? D.memoria : {base_sem_jogador: 6500, por_jogador: 100, pico: 7500};
-  const porJ = Math.max(m.por_jogador, 60);
-  const mem = m.base_sem_jogador + total * porJ + extraMem;
-  const margem = mem * (total > 8 ? 0.08 : 0.04);
-  const esforcoPct = Math.min(100, Math.round(18 + esforco * 2.4));
-  $('m-jog').textContent = `${total} de 50`;
-  $('b-jog').style.width = (total / 50 * 100) + '%'; $('b-jog').style.background = '#ff3e3e';
-  $('m-mem').textContent = `${gb(mem)} (± ${gb(margem)})`;
-  $('b-mem').style.width = Math.min(100, mem / 12000 * 100) + '%';
-  $('b-mem').style.background = mem < 9000 ? '#8fd3ff' : mem < 10500 ? '#ffc83d' : '#ff5a5a';
-  $('n-mem').textContent = `Hoje, no dia a dia, ele fica entre ${gb(m.minimo || 6400)} e ${gb(m.pico)}.`;
-  const nivel = esforcoPct < 55 ? ['Tranquilo', '#6fdc8c'] : esforcoPct < 80 ? ['Moderado', '#ffc83d'] : ['Pesado', '#ff5a5a'];
+  const n = {}; let total = 0, pesado = 0;
+  for (const k in ATIV) { n[k] = +$(k).value; $('v-' + k).textContent = n[k]; total += n[k]; pesado += n[k] * ATIV[k]; }
+  const m = D ? D.memoria : {base_sem_jogador: 6600, por_jogador: 100, pico: 7500, minimo: 6400};
+  const medido = D ? D.pico_jogadores : 8, vagas = D && D.vagas ? D.vagas : 50;
+  const porJ = Math.min(Math.max(m.por_jogador, 40), 120);
+  const ate = Math.min(total, medido), alem = Math.max(0, total - medido);
+  const memBase = m.base_sem_jogador + ate * porJ;
+  const lo = memBase + alem * 40, hi = memBase + alem * 100;
+  $('m-jog').textContent = `${total} de ${vagas}`;
+  $('b-jog').style.width = Math.min(100, total / vagas * 100) + '%'; $('b-jog').style.background = '#ff3e3e';
+  $('m-mem').textContent = alem ? `${gb(lo)} a ${gb(hi)}` : `~${gb(memBase)}`;
+  const escala = 14 * 1024;   // barra = 14 GB so para comparar visualmente (nao e limite do servidor)
+  $('b-mem').style.width = Math.min(100, (lo + hi) / 2 / escala * 100) + '%';
+  $('b-mem').style.background = '#8fd3ff';
+  $('n-mem').textContent = `Hoje ele fica entre ${gb(m.minimo || 6400)} e ${gb(m.pico)}. `
+    + (alem ? `Acima de ${medido} jogadores ainda não há medição: mostramos a faixa provável.` : 'Dentro do que já foi medido.');
+  const ocupacao = total / vagas, mistura = total ? pesado / total : 0;
+  const esforco = Math.min(100, Math.round(15 + ocupacao * 55 + ocupacao * mistura * 30));
+  const nivel = esforco < 40 ? ['Leve', '#6fdc8c'] : esforco < 70 ? ['Moderado', '#ffc83d'] : ['Alto', '#ff8a3d'];
   $('m-cpu').textContent = nivel[0];
-  $('b-cpu').style.width = esforcoPct + '%'; $('b-cpu').style.background = nivel[1];
+  $('b-cpu').style.width = esforco + '%'; $('b-cpu').style.background = nivel[1];
   const v = $('veredito');
   v.style.borderLeftColor = nivel[1];
   v.innerHTML = total === 0 ? 'Servidor vazio: só o mundo, os eventos e o clima rodando.'
     : `<b>${total} jogadores</b> — ${n.construindo} construindo, ${n.explorando} explorando, ${n.pvp} no PvP e ${n.dirigindo} dirigindo. `
-      + (nivel[0] === 'Tranquilo' ? 'O servidor segue folgado: a memória projetada fica perto do que ele já usa hoje.'
-        : nivel[0] === 'Moderado' ? 'Carga moderada: mais tiros e veículos ao mesmo tempo, mas dentro do que o DayZ aguenta bem.'
-        : 'Carga pesada: muita física e combate ao mesmo tempo. É o tipo de cenário que vale acompanhar de perto.')
-      + (total > (D ? D.pico_jogadores : 8) ? ` <span class="nota">(Acima de ${D ? D.pico_jogadores : 8} jogadores ainda não houve medição real — é projeção.)</span>` : '');
+      + (nivel[0] === 'Leve' ? 'O servidor segue folgado.'
+        : nivel[0] === 'Moderado' ? 'Carga moderada: dentro do que um servidor de DayZ desse tamanho roda no dia a dia.'
+        : 'Carga alta: servidor perto de cheio, com muito tiro e veículo ao mesmo tempo. É o uso pesado normal de um servidor lotado, não um travamento.')
+      + (alem ? ` <span class="nota">(Projeção: o máximo já medido foi ${medido} jogadores ao mesmo tempo.)</span>` : '');
 }
 
 function clima() {
