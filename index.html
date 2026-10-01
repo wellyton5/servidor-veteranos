@@ -57,6 +57,21 @@
   .lista li { margin: 6px 0; }
   .lista b { color: var(--texto); }
   .nota { color: var(--texto3); font-size: 13px; }
+  .lead.destaque { color: var(--texto); font-size: clamp(17px, 2.4vw, 21px); font-weight: 600; max-width: 60ch; }
+  .ciclo { position: relative; display: flex; height: 22px; border-radius: 999px; overflow: visible; margin: 46px 0 6px; }
+  .ciclo .seg:first-child { border-radius: 999px 0 0 999px; } .ciclo .seg:nth-child(4) { border-radius: 0 999px 999px 0; }
+  .seg.inverno { background: #e8f6ff; } .seg.degelo { background: linear-gradient(90deg, #bfe6ff, #4aa8d8); }
+  .seg.normal { background: linear-gradient(90deg, #5fbf6a, #9bd36a); } .seg.congela { background: linear-gradient(90deg, #9bd36a, #bfe6ff); }
+  .marcador { position: absolute; top: -8px; bottom: -8px; width: 4px; background: var(--marca); border-radius: 4px; box-shadow: 0 0 0 3px rgba(255,62,62,.25); transition: left .6s; }
+  .marcador span { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 6px; white-space: nowrap;
+                   background: var(--marca); color: #fff; font: 600 12px var(--corpo); padding: 3px 9px; border-radius: 999px; }
+  .ciclo-dias { position: relative; height: 16px; font: 500 11px var(--mono); color: var(--texto3); }
+  .ciclo-dias span { position: absolute; top: 0; }
+  .fases { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 16px; }
+  .fase { background: var(--sup2); border: 1px solid var(--linha); border-radius: 12px; padding: 14px; transition: border-color .3s, box-shadow .3s; }
+  .fase p { margin: 6px 0 0; color: var(--texto2); font-size: 13px; }
+  .fase.agora { border-color: var(--marca); box-shadow: 0 0 0 1px var(--marca) inset; }
+  .fase.agora b::after { content: " · AGORA"; color: var(--marca); font-size: 11px; letter-spacing: .08em; }
   footer { color: var(--texto3); font-size: 13px; border-top: 1px solid var(--linha); padding-top: 16px; }
   .neve { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
   .pagina > * { position: relative; z-index: 1; }
@@ -70,9 +85,29 @@
   <header>
     <div class="sobre">DayZ Xbox · Chernarus</div>
     <h1>BRASIL <span>VETERANOS</span></h1>
-    <p class="lead">Neve no chão, gelo sobre os lagos, nevascas no inverno, dezenas de eventos rodando ao mesmo tempo — e o servidor segue sereno. Aqui estão os números reais de como ele trabalha, medidos minuto a minuto.</p>
+    <p class="lead destaque">O primeiro servidor de console com Chernarus de estações do ano: neve no chão, neve caindo e um clima que muda do inverno ao verão aos olhos do jogador.</p>
+    <p class="lead">Neve, gelo sobre os lagos, nevascas no inverno, dezenas de eventos rodando ao mesmo tempo — e o servidor segue sereno. Aqui estão os números reais de como ele trabalha, medidos minuto a minuto.</p>
     <div class="vivo" id="vivo"><i></i> carregando…</div>
   </header>
+
+  <section class="painel">
+    <h2>Chernarus com estações de verdade</h2>
+    <p class="lead" style="margin-top:4px">Aqui o clima não é fixo. O mundo muda um pouco a cada dia, num ciclo de 32 dias que o jogador vê acontecer — tudo sem mod, só com a configuração do servidor, atualizada sozinha todo dia.</p>
+    <div class="ciclo" id="ciclo" aria-label="Ciclo de 32 dias">
+      <div class="seg inverno" style="flex:1" title="Dia 0 — inverno"></div>
+      <div class="seg degelo" style="flex:14" title="Dias 1 a 14 — degelo"></div>
+      <div class="seg normal" style="flex:8" title="Dias 15 a 22 — Chernarus normal"></div>
+      <div class="seg congela" style="flex:9" title="Dias 23 a 31 — congelamento"></div>
+      <div class="marcador" id="marcador"><span id="marcador-txt"></span></div>
+    </div>
+    <div class="ciclo-dias"><span style="left:0">dia 0</span><span style="left:46.9%">dia 15</span><span style="left:71.9%">dia 23</span><span style="right:0">dia 32</span></div>
+    <div class="fases">
+      <div class="fase" data-f="inverno"><b>❄️ Inverno</b><p>Neve caindo, neve no chão em todo o mapa, lagos congelados, frio de verdade e roupas de inverno aparecendo no loot.</p></div>
+      <div class="fase" data-f="degelo"><b>💧 Degelo · 14 dias</b><p>Neve, nuvens e vento diminuem juntos. O gelo dos lagos some placa por placa até a água voltar.</p></div>
+      <div class="fase" data-f="normal"><b>☀️ Chernarus de sempre · 8 dias</b><p>Sem neve, a chuva volta aos poucos e a temperatura sobe para 13 a 18 °C.</p></div>
+      <div class="fase" data-f="congela"><b>🌨️ Congelamento · 9 dias</b><p>A neve fina volta primeiro, os lagos começam a congelar de novo e o inverno fecha o ciclo.</p></div>
+    </div>
+  </section>
 
   <section>
     <h2>Como ele está agora</h2>
@@ -215,6 +250,17 @@ function simular() {
       + (alem ? ` <span class="nota">(Projeção: o máximo já medido foi ${medido} jogadores ao mesmo tempo.)</span>` : '');
 }
 
+function fasePorDia(d) { return d === 0 ? 'inverno' : d <= 14 ? 'degelo' : d <= 22 ? 'normal' : 'congela'; }
+function ciclo() {
+  const e = D.estacao || {};
+  if (e.dia == null) return;
+  const dia = ((e.dia % 32) + 32) % 32, f = fasePorDia(dia);
+  const nomes = {inverno: 'inverno', degelo: 'degelo', normal: 'Chernarus normal', congela: 'congelamento'};
+  $('marcador').style.left = `calc(${(dia + 0.5) / 32 * 100}% - 2px)`;
+  $('marcador-txt').textContent = `você está aqui: dia ${dia} de 32 · ${nomes[f]}`;
+  const s = $('marcador-txt').style; s.left = dia < 6 ? '0' : dia > 26 ? 'auto' : '50%'; s.right = dia > 26 ? '0' : 'auto'; s.transform = (dia < 6 || dia > 26) ? 'none' : 'translateX(-50%)';
+  document.querySelectorAll('.fase').forEach(el => el.classList.toggle('agora', el.dataset.f === f));
+}
 function clima() {
   const e = D.estacao || {};
   const fases = {inverno: '❄️ Inverno', degelo: '💧 Degelo', verao: '☀️ Verão', 'verão': '☀️ Verão', outono: '🍂 Outono'};
@@ -229,7 +275,7 @@ function clima() {
 async function carregar() {
   try {
     D = await fetch('data/servidor.json?t=' + Date.now()).then(r => r.json());
-    cartoes(); desenharGrafico(); clima(); simular();
+    cartoes(); desenharGrafico(); clima(); ciclo(); simular();
   } catch (e) { $('vivo').textContent = 'Não consegui carregar os dados agora.'; simular(); }
 }
 for (const k in ATIV) $(k).addEventListener('input', simular);
