@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c0c0c">
+<meta name="description" content="Como o servidor DayZ Xbox Brasil Veteranos se comporta: memória, jogadores, clima, eventos e simulador de carga.">
+<title>Servidor Brasil Veteranos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Outfit:wght@300;400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --fundo: #0c0c0c; --sup: #151515; --sup2: #1c1c1c; --linha: rgba(255,255,255,.09);
+    --texto: #f2f0ee; --texto2: #a9a6a3; --texto3: #6f6c69; --marca: #ff3e3e; --gelo: #8fd3ff; --ok: #6fdc8c; --alerta: #ffc83d;
+    --display: 'Black Ops One', Impact, sans-serif; --corpo: 'Outfit', system-ui, sans-serif; --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 400 15px/1.55 var(--corpo);
+         background-image: radial-gradient(ellipse at 85% 0%, rgba(80,160,255,.16) 0%, transparent 45%), radial-gradient(ellipse at 10% 10%, rgba(139,0,0,.2) 0%, transparent 40%);
+         background-attachment: fixed; overflow-x: hidden; }
+  .pagina { max-width: 1120px; margin: 0 auto; padding: 40px 16px 64px; display: flex; flex-direction: column; gap: 40px; }
+  .sobre { font-size: 12px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--texto2); display: flex; align-items: center; gap: 10px; }
+  .sobre::before { content: ""; width: 26px; height: 2px; background: var(--marca); }
+  h1 { margin: 8px 0 0; font: 400 clamp(2.4rem, 9vw, 5rem)/.95 var(--display); }
+  h1 span { color: var(--gelo); }
+  h2 { margin: 0 0 6px; font: 400 clamp(1.5rem, 4vw, 2.1rem) var(--display); letter-spacing: .02em; }
+  .lead { color: var(--texto2); max-width: 68ch; margin: 12px 0 0; font-size: 16px; }
+  .vivo { display: inline-flex; align-items: center; gap: 8px; font: 500 13px var(--mono); color: var(--ok); margin-top: 14px; }
+  .vivo i { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(111,220,140,.6); animation: pulso 1.8s infinite; }
+  @keyframes pulso { 70% { box-shadow: 0 0 0 10px rgba(111,220,140,0); } 100% { box-shadow: 0 0 0 0 rgba(111,220,140,0); } }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .card { background: var(--sup); border: 1px solid var(--linha); border-radius: 14px; padding: 16px; }
+  .card b { display: block; font: 400 30px/1.1 var(--display); }
+  .card small { color: var(--texto2); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .card p { margin: 6px 0 0; color: var(--texto3); font-size: 13px; }
+  .painel { background: var(--sup); border: 1px solid var(--linha); border-radius: 16px; padding: 20px; }
+  .grafico { position: relative; height: 300px; }
+  .sim { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+  .controle { margin: 14px 0; }
+  .controle label { display: flex; justify-content: space-between; font-weight: 600; }
+  .controle label span { font: 500 14px var(--mono); color: var(--gelo); }
+  .controle input { width: 100%; accent-color: var(--marca); }
+  .controle p { margin: 2px 0 0; color: var(--texto3); font-size: 13px; }
+  .medidor { margin: 14px 0; }
+  .medidor .titulo { display: flex; justify-content: space-between; font-weight: 600; }
+  .barra { height: 14px; background: var(--sup2); border-radius: 999px; overflow: hidden; margin-top: 6px; border: 1px solid var(--linha); }
+  .barra div { height: 100%; border-radius: 999px; transition: width .4s, background .4s; }
+  .veredito { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--sup2); border-left: 4px solid var(--ok); }
+  .eventos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .evento { background: var(--sup); border: 1px solid var(--linha); border-radius: 12px; padding: 14px; }
+  .evento b { font-size: 15px; }
+  .evento p { margin: 4px 0 0; color: var(--texto2); font-size: 13px; }
+  .clima { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; }
+  .lista { margin: 10px 0 0; padding-left: 20px; color: var(--texto2); }
+  .lista li { margin: 6px 0; }
+  .lista b { color: var(--texto); }
+  .nota { color: var(--texto3); font-size: 13px; }
+  footer { color: var(--texto3); font-size: 13px; border-top: 1px solid var(--linha); padding-top: 16px; }
+  .neve { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .pagina > * { position: relative; z-index: 1; }
+  @media (max-width: 760px) { .sim { grid-template-columns: 1fr; } .grafico { height: 240px; } .pagina { padding: 28px 12px 48px; gap: 30px; } }
+  @media (prefers-reduced-motion: reduce) { .neve { display: none; } .vivo i { animation: none; } }
+</style>
+</head>
+<body>
+<canvas class="neve" id="neve" aria-hidden="true"></canvas>
+<div class="pagina">
+  <header>
+    <div class="sobre">DayZ Xbox · Chernarus</div>
+    <h1>BRASIL <span>VETERANOS</span></h1>
+    <p class="lead">Neve no chão, gelo sobre os lagos, nevascas no inverno, dezenas de eventos rodando ao mesmo tempo — e o servidor segue sereno. Aqui estão os números reais de como ele trabalha, medidos minuto a minuto.</p>
+    <div class="vivo" id="vivo"><i></i> carregando…</div>
+  </header>
+
+  <section>
+    <h2>Como ele está agora</h2>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="painel">
+    <h2>Últimas 48 horas</h2>
+    <p class="nota">Memória usada pelo servidor (linha) e jogadores online (barras). Uma medição por minuto, direto do painel da Nitrado.</p>
+    <div class="grafico"><canvas id="grafico"></canvas></div>
+    <p class="nota" id="leitura"></p>
+  </section>
+
+  <section class="painel">
+    <h2>Simulador: e com o servidor cheio?</h2>
+    <p class="nota">Monte o cenário. A projeção usa o quanto a memória do servidor sobe a cada jogador a mais (medido nos dados reais) e o peso típico de cada atividade no DayZ. É uma <b>estimativa</b>, não um teste com jogadores de verdade.</p>
+    <div class="sim">
+      <div>
+        <div class="controle"><label>🔨 Construindo base <span id="v-construindo">4</span></label><input type="range" min="0" max="25" value="4" id="construindo"><p>Paredes, portões, barris: cada peça vira um objeto salvo no mundo.</p></div>
+        <div class="controle"><label>🧭 Explorando o mapa <span id="v-explorando">4</span></label><input type="range" min="0" max="25" value="4" id="explorando"><p>O servidor cria loot e zumbis em volta de quem anda.</p></div>
+        <div class="controle"><label>🔫 No PvP <span id="v-pvp">4</span></label><input type="range" min="0" max="25" value="4" id="pvp"><p>Tiros, dano e balística calculados pelo servidor.</p></div>
+        <div class="controle"><label>🚚 Dirigindo caminhão kit base <span id="v-dirigindo">3</span></label><input type="range" min="0" max="25" value="3" id="dirigindo"><p>Física do veículo e o mapa carregando rápido no caminho.</p></div>
+      </div>
+      <div>
+        <div class="medidor"><div class="titulo"><span>Jogadores</span><span id="m-jog"></span></div><div class="barra"><div id="b-jog"></div></div></div>
+        <div class="medidor"><div class="titulo"><span>Memória projetada</span><span id="m-mem"></span></div><div class="barra"><div id="b-mem"></div></div><p class="nota" id="n-mem"></p></div>
+        <div class="medidor"><div class="titulo"><span>Esforço do processador</span><span id="m-cpu"></span></div><div class="barra"><div id="b-cpu"></div></div></div>
+        <div class="veredito" id="veredito"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Clima de agora</h2>
+    <p class="nota">Chernarus aqui tem estações: um ciclo de inverno, degelo e verão que muda o clima, a temperatura e o gelo dos lagos todo dia.</p>
+    <div class="clima" id="clima"></div>
+  </section>
+
+  <section>
+    <h2>O que roda ao mesmo tempo</h2>
+    <p class="nota">Tudo isso fica ativo no mundo enquanto você joga.</p>
+    <div class="eventos">
+      <div class="evento"><b>❄️ Inverno de verdade</b><p>Neve no chão em 9 regiões do mapa, gelo em placas sobre centenas de lagos e nevascas — trocados todo dia conforme a estação.</p></div>
+      <div class="evento"><b>🚁 Quedas e destroços</b><p>Helicópteros caídos, caixas de avião, comboio militar, trem, avião NBC e helis civis no litoral e no NWAF.</p></div>
+      <div class="evento"><b>🚚 30 caminhões e 50 carros</b><p>Caminhões kit base e seis modelos de carro espalhados, prontos para quem achar as peças.</p></div>
+      <div class="evento"><b>🐺 Lobos e ursos</b><p>Matilhas no litoral, lobos e ursos guardando Tisy, cervos, javalis e criação nas fazendas.</p></div>
+      <div class="evento"><b>🧟 14 tipos de infectados</b><p>Militares, policiais, médicos, NBC e a guarda do bunker do Lago Negro, que renasce sem parar.</p></div>
+      <div class="evento"><b>🎣 Barcos de pesca</b><p>Quatro barcos no litoral com baús de pesca para quem nadar até eles.</p></div>
+      <div class="evento"><b>🏚️ Bunker do Lago Negro</b><p>Mais de mil objetos montados à mão: salas escuras, prisão, laboratório e loot de alto nível.</p></div>
+      <div class="evento"><b>🍎 Natureza viva</b><p>Árvores frutíferas, tábuas pelo mapa e loot calibrado por região (tiers).</p></div>
+    </div>
+  </section>
+
+  <section class="painel">
+    <h2>Por que ele fica sereno</h2>
+    <ul class="lista" id="porque">
+      <li><b>Reinício programado</b> a cada 2h14: o mundo é limpo e recarregado antes de acumular sujeira.</li>
+      <li><b>Memória estável</b>: ela não cresce sem controle entre um reinício e outro — sinal de que nada está "vazando".</li>
+      <li><b>Loot completo e calibrado</b>: lista de itens da versão 1.29 inteira, com quantidades ajustadas por região.</li>
+      <li><b>Limpeza rápida</b>: corpos de zumbi somem em 90 s, sem pilha de objetos parados no mapa.</li>
+      <li><b>Mudanças grandes testadas antes</b> num servidor de teste, antes de chegar aqui.</li>
+      <li><b>Vigiado 24 horas</b> pelo bot Sentinela, que lê o registro do servidor a cada 15 segundos.</li>
+    </ul>
+  </section>
+
+  <footer id="rodape">Dados: painel da Nitrado (memória, processador, jogadores) e registro do servidor. Atualizado sozinho a cada hora.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const gb = mb => (mb / 1024).toFixed(1).replace('.', ',') + ' GB';
+const br = iso => new Date(iso).toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+let D = null, grafico = null;
+
+function cartoes() {
+  const m = D.memoria;
+  $('vivo').innerHTML = `<i></i> ${D.status === 'started' ? 'ONLINE' : 'reiniciando'} · ${D.jogadores_agora ?? 0} jogando agora · atualizado ${br(D.atualizado)}`;
+  $('cards').innerHTML = [
+    [gb(m.media), 'memória média', 'Nas últimas 48 h'],
+    [gb(m.pico), 'pico de memória', 'O maior valor medido'],
+    [`${D.cpu_media}%`.replace('.', ','), 'processador médio', 'Média de todas as medições'],
+    [`${D.pico_jogadores}`, 'pico de jogadores', 'Ao mesmo tempo, em 48 h'],
+    ['2h14', 'reinício automático', 'Mundo limpo e recarregado'],
+    [`${D.amostras}`, 'medições', 'Uma por minuto'],
+  ].map(([v, t, p]) => `<div class="card"><b>${v}</b><small>${t}</small><p>${p}</p></div>`).join('');
+  const base = m.base_sem_jogador, pj = m.por_jogador;
+  $('leitura').textContent = `Leitura: com o servidor vazio ele usa cerca de ${gb(base)}; cada jogador a mais soma em média ${Math.round(pj)} MB. Entre ${gb(m.minimo)} e ${gb(m.pico)} em 48 horas — uma faixa estreita.`;
+}
+
+function desenharGrafico() {
+  const pts = D.grafico.filter(p => p[1] != null);
+  const rot = pts.map(p => new Date(p[0] * 1000).toLocaleTimeString('pt-BR', {timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit'}));
+  if (grafico) grafico.destroy();
+  grafico = new Chart($('grafico'), {
+    data: {labels: rot, datasets: [
+      {type: 'line', label: 'Memória (GB)', data: pts.map(p => p[1] / 1024), borderColor: '#8fd3ff', backgroundColor: 'rgba(143,211,255,.12)', fill: true, pointRadius: 0, tension: .3, yAxisID: 'y'},
+      {type: 'bar', label: 'Jogadores', data: pts.map(p => p[3]), backgroundColor: 'rgba(255,62,62,.55)', yAxisID: 'y2'}]},
+    options: {responsive: true, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false},
+      plugins: {legend: {labels: {color: '#a9a6a3'}}},
+      scales: {x: {ticks: {color: '#6f6c69', maxTicksLimit: 8}, grid: {color: 'rgba(255,255,255,.05)'}},
+               y: {position: 'left', min: 0, suggestedMax: 9, ticks: {color: '#8fd3ff', callback: v => v + ' GB'}, grid: {color: 'rgba(255,255,255,.05)'}},
+               y2: {position: 'right', min: 0, suggestedMax: 15, ticks: {color: '#ff6b6b', stepSize: 5}, grid: {display: false}}}}
+  });
+}
+
+// Peso de cada atividade (estimativa, MB extra por jogador e esforço relativo)
+const ATIV = {construindo: {mem: 15, cpu: 1.0}, explorando: {mem: 30, cpu: 1.4}, pvp: {mem: 10, cpu: 1.8}, dirigindo: {mem: 40, cpu: 2.2}};
+function simular() {
+  const n = {}; let total = 0, extraMem = 0, esforco = 0;
+  for (const k in ATIV) { n[k] = +$(k).value; $('v-' + k).textContent = n[k]; total += n[k]; extraMem += n[k] * ATIV[k].mem; esforco += n[k] * ATIV[k].cpu; }
+  const m = D ? D.memoria : {base_sem_jogador: 6500, por_jogador: 100, pico: 7500};
+  const porJ = Math.max(m.por_jogador, 60);
+  const mem = m.base_sem_jogador + total * porJ + extraMem;
+  const margem = mem * (total > 8 ? 0.08 : 0.04);
+  const esforcoPct = Math.min(100, Math.round(18 + esforco * 2.4));
+  $('m-jog').textContent = `${total} de 50`;
+  $('b-jog').style.width = (total / 50 * 100) + '%'; $('b-jog').style.background = '#ff3e3e';
+  $('m-mem').textContent = `${gb(mem)} (± ${gb(margem)})`;
+  $('b-mem').style.width = Math.min(100, mem / 12000 * 100) + '%';
+  $('b-mem').style.background = mem < 9000 ? '#8fd3ff' : mem < 10500 ? '#ffc83d' : '#ff5a5a';
+  $('n-mem').textContent = `Hoje, no dia a dia, ele fica entre ${gb(m.minimo || 6400)} e ${gb(m.pico)}.`;
+  const nivel = esforcoPct < 55 ? ['Tranquilo', '#6fdc8c'] : esforcoPct < 80 ? ['Moderado', '#ffc83d'] : ['Pesado', '#ff5a5a'];
+  $('m-cpu').textContent = nivel[0];
+  $('b-cpu').style.width = esforcoPct + '%'; $('b-cpu').style.background = nivel[1];
+  const v = $('veredito');
+  v.style.borderLeftColor = nivel[1];
+  v.innerHTML = total === 0 ? 'Servidor vazio: só o mundo, os eventos e o clima rodando.'
+    : `<b>${total} jogadores</b> — ${n.construindo} construindo, ${n.explorando} explorando, ${n.pvp} no PvP e ${n.dirigindo} dirigindo. `
+      + (nivel[0] === 'Tranquilo' ? 'O servidor segue folgado: a memória projetada fica perto do que ele já usa hoje.'
+        : nivel[0] === 'Moderado' ? 'Carga moderada: mais tiros e veículos ao mesmo tempo, mas dentro do que o DayZ aguenta bem.'
+        : 'Carga pesada: muita física e combate ao mesmo tempo. É o tipo de cenário que vale acompanhar de perto.')
+      + (total > (D ? D.pico_jogadores : 8) ? ` <span class="nota">(Acima de ${D ? D.pico_jogadores : 8} jogadores ainda não houve medição real — é projeção.)</span>` : '');
+}
+
+function clima() {
+  const e = D.estacao || {};
+  const fases = {inverno: '❄️ Inverno', degelo: '💧 Degelo', verao: '☀️ Verão', 'verão': '☀️ Verão', outono: '🍂 Outono'};
+  $('clima').innerHTML = [
+    [fases[e.fase] || e.fase || '—', `fase da estação · dia ${e.dia ?? '—'}`],
+    [`${e.lagos_congelados ?? '—'}`, 'lagos ainda congelados'],
+    [`${e.gelo_pct != null ? Math.round(e.gelo_pct) + '%' : '—'}`, 'do gelo de inverno'],
+    [`${e.itens_frio_ativos ?? '—'}`, 'itens de frio no loot'],
+  ].map(([v, t]) => `<div class="card"><b>${v}</b><small>${t}</small></div>`).join('');
+}
+
+async function carregar() {
+  try {
+    D = await fetch('data/servidor.json?t=' + Date.now()).then(r => r.json());
+    cartoes(); desenharGrafico(); clima(); simular();
+  } catch (e) { $('vivo').textContent = 'Não consegui carregar os dados agora.'; simular(); }
+}
+for (const k in ATIV) $(k).addEventListener('input', simular);
+carregar(); setInterval(carregar, 10 * 60 * 1000);
+
+// neve caindo de leve no fundo
+(() => {
+  const c = $('neve'), x = c.getContext('2d'); let flocos = [];
+  const tam = () => { c.width = innerWidth; c.height = innerHeight; flocos = Array.from({length: Math.min(90, innerWidth / 14)}, () => ({x: Math.random() * c.width, y: Math.random() * c.height, r: Math.random() * 1.8 + .4, v: Math.random() * .5 + .2, d: Math.random() * .6 - .3})); };
+  tam(); addEventListener('resize', tam);
+  (function quadro() {
+    x.clearRect(0, 0, c.width, c.height); x.fillStyle = 'rgba(255,255,255,.55)';
+    for (const f of flocos) { f.y += f.v; f.x += f.d; if (f.y > c.height) { f.y = -4; f.x = Math.random() * c.width; } x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.3); x.fill(); }
+    requestAnimationFrame(quadro);
+  })();
+})();
+</script>
+</body>
+</html>
