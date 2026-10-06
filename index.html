@@ -59,9 +59,9 @@
   .nota { color: var(--texto3); font-size: 13px; }
   .lead.destaque { color: var(--texto); font-size: clamp(17px, 2.4vw, 21px); font-weight: 600; max-width: 60ch; }
   .ciclo { position: relative; display: flex; height: 22px; border-radius: 999px; overflow: visible; margin: 46px 0 6px; }
-  .ciclo .seg:first-child { border-radius: 999px 0 0 999px; } .ciclo .seg:nth-child(4) { border-radius: 0 999px 999px 0; }
+  .ciclo .seg:first-child { border-radius: 999px 0 0 999px; } .ciclo .seg:nth-child(5) { border-radius: 0 999px 999px 0; }
   .seg.inverno { background: #e8f6ff; } .seg.degelo { background: linear-gradient(90deg, #bfe6ff, #4aa8d8); }
-  .seg.normal { background: linear-gradient(90deg, #5fbf6a, #9bd36a); } .seg.congela { background: linear-gradient(90deg, #9bd36a, #bfe6ff); }
+  .seg.normal { background: linear-gradient(90deg, #5fbf6a, #9bd36a); } .seg.sol { background: linear-gradient(90deg, #f7d154, #f5a623); } .seg.congela { background: linear-gradient(90deg, #f5a623, #bfe6ff); }
   .marcador { position: absolute; top: -8px; bottom: -8px; width: 4px; background: var(--marca); border-radius: 4px; box-shadow: 0 0 0 3px rgba(255,62,62,.25); transition: left .6s; }
   .marcador span { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 6px; white-space: nowrap;
                    background: var(--marca); color: #fff; font: 600 12px var(--corpo); padding: 3px 9px; border-radius: 999px; }
@@ -102,20 +102,22 @@
 
   <section class="painel">
     <h2>Chernarus com estações de verdade</h2>
-    <p class="lead" style="margin-top:4px">Aqui o clima não é fixo. O mundo muda um pouco a cada dia, num ciclo de 32 dias que o jogador vê acontecer — tudo sem mod, só com a configuração do servidor, atualizada sozinha todo dia.</p>
-    <div class="ciclo" id="ciclo" aria-label="Ciclo de 32 dias">
+    <p class="lead" style="margin-top:4px">Aqui o clima não é fixo. O mundo muda um pouco a cada dia, num ciclo de 43 dias que o jogador vê acontecer — tudo sem mod, só com a configuração do servidor, atualizada sozinha todo dia.</p>
+    <div class="ciclo" id="ciclo" aria-label="Ciclo de 43 dias">
       <div class="seg inverno" style="flex:1" title="Dia 0 — inverno"></div>
       <div class="seg degelo" style="flex:14" title="Dias 1 a 14 — degelo"></div>
-      <div class="seg normal" style="flex:8" title="Dias 15 a 22 — Chernarus normal"></div>
-      <div class="seg congela" style="flex:9" title="Dias 23 a 31 — congelamento"></div>
+      <div class="seg normal" style="flex:9" title="Dias 15 a 23 — Chernarus normal com garoa"></div>
+      <div class="seg sol" style="flex:10" title="Dias 24 a 33 — sol pleno"></div>
+      <div class="seg congela" style="flex:9" title="Dias 34 a 42 — congelamento"></div>
       <div class="marcador" id="marcador"><span id="marcador-txt"></span></div>
     </div>
-    <div class="ciclo-dias"><span style="left:0">dia 0</span><span style="left:46.9%">dia 15</span><span style="left:71.9%">dia 23</span><span style="right:0">dia 32</span></div>
+    <div class="ciclo-dias"><span style="left:0">dia 0</span><span style="left:34.9%">dia 15</span><span style="left:55.8%">dia 24</span><span style="left:79.1%">dia 34</span><span style="right:0">dia 43</span></div>
     <div class="fases">
       <div class="fase" data-f="inverno"><b>❄️ Inverno</b><p>Neve caindo, neve no chão em todo o mapa, lagos congelados, frio de verdade e roupas de inverno aparecendo no loot.</p></div>
       <div class="fase" data-f="degelo"><b>💧 Degelo · 14 dias</b><p>Neve, nuvens e vento diminuem juntos. O gelo dos lagos some placa por placa até a água voltar.</p></div>
-      <div class="fase" data-f="normal"><b>☀️ Chernarus de sempre · 8 dias</b><p>Sem neve, a chuva volta aos poucos e a temperatura sobe para 13 a 18 °C.</p></div>
-      <div class="fase" data-f="congela"><b>🌨️ Congelamento · 9 dias</b><p>A neve fina volta primeiro, os lagos começam a congelar de novo e o inverno fecha o ciclo.</p></div>
+      <div class="fase" data-f="normal"><b>🌦️ Chernarus de sempre · 9 dias</b><p>Sem neve e com 13 a 18 °C. Garoas curtas e fracas vêm e vão, sem tempestade, e somem aos poucos.</p></div>
+      <div class="fase" data-f="sol"><b>☀️ Sol pleno · 10 dias</b><p>Céu limpo, sem chuva e sem neblina, 13 a 18 °C. Os dias mais abertos do ciclo, antes do frio.</p></div>
+      <div class="fase" data-f="congela"><b>🌨️ Congelamento · 9 dias</b><p>O céu volta a fechar devagar, a neve fina volta primeiro, os lagos congelam de novo e o inverno fecha o ciclo.</p></div>
     </div>
   </section>
 
@@ -152,7 +154,7 @@
 
   <section>
     <h2>Clima de agora</h2>
-    <p class="nota">Chernarus aqui tem estações: um ciclo de inverno, degelo e verão que muda o clima, a temperatura e o gelo dos lagos todo dia.</p>
+    <p class="nota">Chernarus aqui tem estações: um ciclo de inverno, degelo, garoa e sol que muda o clima, a temperatura e o gelo dos lagos todo dia.</p>
     <div class="clima" id="clima"></div>
   </section>
 
@@ -260,20 +262,20 @@ function simular() {
       + (alem ? ` <span class="nota">(Projeção: o máximo já medido foi ${medido} jogadores ao mesmo tempo.)</span>` : '');
 }
 
-function fasePorDia(d) { return d === 0 ? 'inverno' : d <= 14 ? 'degelo' : d <= 22 ? 'normal' : 'congela'; }
+function fasePorDia(d) { return d === 0 ? 'inverno' : d <= 14 ? 'degelo' : d <= 23 ? 'normal' : d <= 33 ? 'sol' : 'congela'; }
 function ciclo() {
   const e = D.estacao || {};
   if (e.dia == null) return;
-  const dia = ((e.dia % 32) + 32) % 32, f = fasePorDia(dia);
-  const nomes = {inverno: 'inverno', degelo: 'degelo', normal: 'Chernarus normal', congela: 'congelamento'};
-  $('marcador').style.left = `calc(${(dia + 0.5) / 32 * 100}% - 2px)`;
-  $('marcador-txt').textContent = `você está aqui: dia ${dia} de 32 · ${nomes[f]}`;
-  const s = $('marcador-txt').style; s.left = dia < 6 ? '0' : dia > 26 ? 'auto' : '50%'; s.right = dia > 26 ? '0' : 'auto'; s.transform = (dia < 6 || dia > 26) ? 'none' : 'translateX(-50%)';
+  const dia = ((e.dia % 43) + 43) % 43, f = fasePorDia(dia);
+  const nomes = {inverno: 'inverno', degelo: 'degelo', normal: 'Chernarus normal com garoa', sol: 'sol pleno', congela: 'congelamento'};
+  $('marcador').style.left = `calc(${(dia + 0.5) / 43 * 100}% - 2px)`;
+  $('marcador-txt').textContent = `você está aqui: dia ${dia} de 43 · ${nomes[f]}`;
+  const s = $('marcador-txt').style; s.left = dia < 8 ? '0' : dia > 35 ? 'auto' : '50%'; s.right = dia > 35 ? '0' : 'auto'; s.transform = (dia < 8 || dia > 35) ? 'none' : 'translateX(-50%)';
   document.querySelectorAll('.fase').forEach(el => el.classList.toggle('agora', el.dataset.f === f));
 }
 function clima() {
   const e = D.estacao || {};
-  const fases = {inverno: '❄️ Inverno', degelo: '💧 Degelo', verao: '☀️ Verão', 'verão': '☀️ Verão', outono: '🍂 Outono'};
+  const fases = {inverno: '❄️ Inverno', degelo: '💧 Degelo', normal: '🌦️ Garoa', sol: '☀️ Sol pleno', congelamento: '🌨️ Congelamento', verao: '☀️ Verão', 'verão': '☀️ Verão', outono: '🍂 Outono'};
   $('clima').innerHTML = [
     [fases[e.fase] || e.fase || '—', `fase da estação · dia ${e.dia ?? '—'}`],
     [`${e.lagos_congelados ?? '—'}`, 'lagos ainda congelados'],
